@@ -6,7 +6,7 @@ use crate::{
 #[cfg(any(target_os = "stax", target_os = "flex"))]
 use include_gif::include_gif;
 #[cfg(any(target_os = "stax", target_os = "flex"))]
-use ledger_device_sdk::nbgl::{Field, NbglGlyph, NbglReview};
+use ledger_device_sdk::nbgl::{Field, NbglGlyph, NbglReview, NbglReviewStatus, StatusType};
 #[cfg(not(any(target_os = "stax", target_os = "flex")))]
 use ledger_device_sdk::ui::{
     bitmaps::{CROSSMARK, EYE, VALIDATE_14},
@@ -101,10 +101,20 @@ pub fn ui_display(payload: &mut Payload) -> bool {
         const NEAR_LOGO: NbglGlyph =
             NbglGlyph::from_include(include_gif!("icons/app_near_64px.gif", NBGL));
 
-        let mut review: NbglReview = NbglReview::new()
+        let review: NbglReview = NbglReview::new()
             .titles("Review NEP413 msg sign", "", "Sign message")
             .glyph(&NEAR_LOGO);
 
-        review.show(field_writer.get_fields())
+        let res = review.show(field_writer.get_fields());
+        let status = NbglReviewStatus::new();
+        match res {
+            true => {
+                status.status_type(StatusType::Message).show(true);
+            }
+            false => {
+                status.status_type(StatusType::Message).show(false);
+            }
+        }
+        res
     }
 }

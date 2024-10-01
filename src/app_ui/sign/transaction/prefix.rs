@@ -3,7 +3,7 @@ use include_gif::include_gif;
 #[cfg(any(target_os = "stax", target_os = "flex"))]
 use ledger_device_sdk::nbgl::{
     CenteredInfo, CenteredInfoStyle, Field, InfoButton, NbglGenericReview, NbglGlyph,
-    NbglPageContent, TagValueList, TuneIndex,
+    NbglPageContent, NbglStatus, TagValueList, TuneIndex,
 };
 #[cfg(not(any(target_os = "stax", target_os = "flex")))]
 use ledger_device_sdk::ui::{
@@ -113,11 +113,21 @@ pub fn ui_display(prefix: &mut parsing::types::transaction::prefix::Prefix) -> b
 
         let tag_values_list = TagValueList::new(field_writer.get_fields(), 2, false, false);
 
-        let mut review: NbglGenericReview = NbglGenericReview::new()
+        let review: NbglGenericReview = NbglGenericReview::new()
             .add_content(NbglPageContent::CenteredInfo(centered_info))
             .add_content(NbglPageContent::TagValueList(tag_values_list))
             .add_content(NbglPageContent::InfoButton(info_button));
 
-        review.show("Reject", "Header confirmed", "Transaction rejected")
+        let res = review.show("Reject");
+        let status: NbglStatus = NbglStatus::new();
+        match res {
+            true => {
+                status.text("Header confirmed").show(true);
+            }
+            false => {
+                status.text("Transaction rejected").show(false);
+            }
+        }
+        res
     }
 }

@@ -1,7 +1,7 @@
 #[cfg(any(target_os = "stax", target_os = "flex"))]
 use include_gif::include_gif;
 #[cfg(any(target_os = "stax", target_os = "flex"))]
-use ledger_device_sdk::nbgl::{Field, NbglGlyph, NbglReview};
+use ledger_device_sdk::nbgl::{Field, NbglGlyph, NbglReview, NbglReviewStatus, StatusType};
 #[cfg(not(any(target_os = "stax", target_os = "flex")))]
 use ledger_device_sdk::ui::{
     bitmaps::{CROSSMARK, EYE, VALIDATE_14},
@@ -92,10 +92,20 @@ pub fn ui_display(suffix: &parsing::types::nep366_delegate_action::suffix::Suffi
         const NEAR_LOGO: NbglGlyph =
             NbglGlyph::from_include(include_gif!("icons/app_near_64px.gif", NBGL));
 
-        let mut review: NbglReview = NbglReview::new()
+        let review: NbglReview = NbglReview::new()
             .titles(msg_before, "", "Sign transaction")
             .glyph(&NEAR_LOGO);
 
-        review.show(field_writer.get_fields())
+        let res = review.show(field_writer.get_fields());
+        let status = NbglReviewStatus::new();
+        match res {
+            true => {
+                status.status_type(StatusType::Transaction).show(true);
+            }
+            false => {
+                status.status_type(StatusType::Transaction).show(false);
+            }
+        }
+        res
     }
 }

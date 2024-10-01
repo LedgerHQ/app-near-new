@@ -21,7 +21,7 @@ use fmt_buffer::Buffer;
 #[cfg(any(target_os = "stax", target_os = "flex"))]
 use include_gif::include_gif;
 #[cfg(any(target_os = "stax", target_os = "flex"))]
-use ledger_device_sdk::nbgl::{NbglAddressReview, NbglGlyph};
+use ledger_device_sdk::nbgl::{NbglAddressReview, NbglGlyph, NbglReviewStatus, StatusType};
 #[cfg(not(any(target_os = "stax", target_os = "flex")))]
 use ledger_device_sdk::ui::bitmaps::{CROSSMARK, EYE, VALIDATE_14};
 #[cfg(not(any(target_os = "stax", target_os = "flex")))]
@@ -55,11 +55,22 @@ pub fn ui_display_pk_base58(public_key: &crypto::PublicKeyBe) -> Result<bool, Ap
         const NEAR_LOGO: NbglGlyph =
             NbglGlyph::from_include(include_gif!("icons/app_near_64px.gif", NBGL));
 
-        let mut review: NbglAddressReview = NbglAddressReview::new()
+        let review: NbglAddressReview = NbglAddressReview::new()
             .glyph(&NEAR_LOGO)
             .verify_str("Confirm Public Key");
 
-        Ok(review.show(out_buf.as_str()))
+        let res = review.show(out_buf.as_str());
+        let status = NbglReviewStatus::new();
+        match res {
+            true => {
+                status.status_type(StatusType::Address).show(true);
+            }
+            false => {
+                status.status_type(StatusType::Address).show(false);
+            }
+        }
+
+        Ok(res)
     }
 }
 
@@ -90,10 +101,20 @@ pub fn ui_display_hex(public_key: &crypto::PublicKeyBe) -> Result<bool, AppSW> {
         const NEAR_LOGO: NbglGlyph =
             NbglGlyph::from_include(include_gif!("icons/app_near_64px.gif", NBGL));
 
-        let mut review: NbglAddressReview = NbglAddressReview::new()
+        let review: NbglAddressReview = NbglAddressReview::new()
             .glyph(&NEAR_LOGO)
             .verify_str("Confirm Wallet ID");
 
-        Ok(review.show(pbkey_str))
+        let res = review.show(pbkey_str);
+        let status = NbglReviewStatus::new();
+        match res {
+            true => {
+                status.status_type(StatusType::Address).show(true);
+            }
+            false => {
+                status.status_type(StatusType::Address).show(false);
+            }
+        }
+        Ok(res)
     }
 }

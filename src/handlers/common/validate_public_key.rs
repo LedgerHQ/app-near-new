@@ -9,7 +9,7 @@ use ledger_device_sdk::ecc::Ed25519;
 #[cfg(any(target_os = "stax", target_os = "flex"))]
 use ledger_device_sdk::nbgl::{
     CenteredInfo, CenteredInfoStyle, Field, InfoButton, NbglGenericReview, NbglGlyph,
-    NbglPageContent, TagValueList, TuneIndex,
+    NbglPageContent, NbglStatus, TagValueList, TuneIndex,
 };
 #[cfg(not(any(target_os = "stax", target_os = "flex")))]
 use ledger_device_sdk::ui::{
@@ -125,11 +125,21 @@ fn ui_display(info: &KeyMismatchInfo) -> Result<bool, AppSW> {
 
         let tag_values_list = TagValueList::new(&my_fields, 2, false, false);
 
-        let mut review: NbglGenericReview = NbglGenericReview::new()
+        let review: NbglGenericReview = NbglGenericReview::new()
             .add_content(NbglPageContent::CenteredInfo(centered_info))
             .add_content(NbglPageContent::TagValueList(tag_values_list))
             .add_content(NbglPageContent::InfoButton(info_button));
 
-        Ok(review.show("Reject", "Confirmed", "Transaction rejected"))
+        let res = review.show("Reject");
+        let status: NbglStatus = NbglStatus::new();
+        match res {
+            true => {
+                status.text("Confirmed").show(true);
+            }
+            false => {
+                status.text("Transaction rejected").show(false);
+            }
+        }
+        Ok(res)
     }
 }

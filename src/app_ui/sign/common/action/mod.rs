@@ -8,7 +8,7 @@ use ledger_device_sdk::io::Comm;
 #[cfg(any(target_os = "stax", target_os = "flex"))]
 use ledger_device_sdk::nbgl::{
     CenteredInfo, CenteredInfoStyle, InfoButton, InfoLongPress, NbglGenericReview, NbglGlyph,
-    NbglPageContent, TagValueList, TuneIndex,
+    NbglPageContent, NbglStatus, TagValueList, TuneIndex,
 };
 #[cfg(not(any(target_os = "stax", target_os = "flex")))]
 use ledger_device_sdk::{
@@ -212,10 +212,19 @@ pub fn ui_display_delegate_error(#[allow(unused)] comm: &mut Comm) {
             TuneIndex::Success,
         );
 
-        let mut review: NbglGenericReview =
+        let review: NbglGenericReview =
             NbglGenericReview::new().add_content(NbglPageContent::InfoButton(info_button));
 
-        review.show("Reject", "Transaction Rejected", "Transaction Rejected");
+        let res = review.show("Reject");
+        let status: NbglStatus = NbglStatus::new();
+        match res {
+            true => {
+                status.text("Transaction rejected").show(true);
+            }
+            false => {
+                status.text("Transaction rejected").show(false);
+            }
+        }
     }
 }
 
@@ -303,7 +312,17 @@ pub fn ui_display_common<const N: usize>(
             last_screen = "Action confirmed";
         }
 
-        review.show("Reject", last_screen, "Transaction rejected")
+        let res = review.show("Reject");
+        let status: NbglStatus = NbglStatus::new();
+        match res {
+            true => {
+                status.text(last_screen).show(true);
+            }
+            false => {
+                status.text("Transaction rejected").show(false);
+            }
+        }
+        res
     }
 }
 

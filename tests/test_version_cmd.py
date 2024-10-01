@@ -9,4 +9,4 @@ def test_get_version_cmd(backend):
     version = client.get_version().data
     assert len(version) == 3
     # Assert that we have received the correct app version compared as Makefile data
-    assert (version[0], version[1], version[2]) == (2, 2, 0)
+    assert (version[0], version[1], version[2]) == (2, 2, 1)
